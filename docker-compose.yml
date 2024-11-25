@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  backend:
+    build:
+      context: ./stock-exchange-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/stock_exchange
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=142002
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./stock-exchange-frontend
+    ports:
+      - "3000:80"
+
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: 142002
+      MYSQL_DATABASE: stock_exchange
+    ports:
+      - "3306:3306"
