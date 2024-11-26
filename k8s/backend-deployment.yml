@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: stock-backend
-          image: stock-exchange-backend:latest
+          image: mutedslow/stock-exchange-backend:latest
           ports:
             - containerPort: 8080
 ---
