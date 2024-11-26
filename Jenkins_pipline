@@ -1,0 +1,109 @@
+pipeline {
+    agent any
+
+    environment {
+        BACKEND_IMAGE = "stock-exchange-backend:latest"
+        FRONTEND_IMAGE = "stock-exchange-frontend:latest"
+        DOCKER_REGISTRY = "docker.io/mutedslow"
+        K8S_NAMESPACE = "stock-exchange"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo 'Checking out code from GitHub...'
+                git branch: 'main', url: 'https://github.com/MutantShakes/Devops-Stock-Exchange.git'
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                dir('stock-exchange-backend') {
+                    echo 'Building the backend...'
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('stock-exchange-frontend') {
+                    echo 'Building the frontend...'
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Docker Build & Push') {
+            steps {
+                parallel (
+                    backend: {
+                        dir('stock-exchange-backend') {
+                            echo 'Building and pushing the backend Docker image...'
+                            script{
+                                docker_image_b = docker.build "mutedslow/stock-exchange-backend:latest"
+                                docker.withRegistry('','d4433f4a-a142-409d-9f5a-fafca75a264b'){
+                                docker_image_b.push()
+                                }
+                            }
+                        }
+                    },
+                    frontend: {
+                        dir('stock-exchange-frontend') {
+                            echo 'Building and pushing the frontend Docker image...'
+                            script{
+                                docker_image_b = docker.build "mutedslow/stock-exchange-frontend:latest"
+                                docker.withRegistry('','d4433f4a-a142-409d-9f5a-fafca75a264b'){
+                                docker_image_b.push()
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+        }
+        
+        
+        stage('Clean docker images'){
+            steps{
+                script{
+                    sh 'docker container prune -f'
+                    sh 'docker image prune -f'
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo 'Deploying the application to Kubernetes...'
+                withKubeConfig([credentialsId: 'k8s-credentials']) {
+                    sh '''
+                    kubectl apply -f k8s/backend-deployment.yml --namespace=$K8S_NAMESPACE
+                    kubectl apply -f k8s/frontend-deployment.yml --namespace=$K8S_NAMESPACE
+                    '''
+                }
+                
+            }
+        }
+
+        stage('Post-Deployment Tests') {
+            steps {
+                echo 'Running post-deployment tests...'
+                sh '''
+                curl -f http://$(kubectl get svc stock-frontend-service --namespace=$K8S_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build, push, and deployment were successful!'
+        }
+        failure {
+            echo 'Something went wrong with the pipeline.'
+        }
+    }
+}
+
