@@ -1,0 +1,45 @@
+---
+- name: Deploying with Kubernetes
+  hosts: localhost
+  tasks:
+    - name: Install prerequisites
+      pip:
+        name:
+          - openshift
+          - pyyaml
+          - kubernetes
+
+    - name: Apply Secrets
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', './k8s/boot-backend-secret.yaml') | from_yaml }}"
+
+    - name: Create Backend Deployment
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', './k8s/backend-deployment.yaml') | from_yaml }}"
+
+    - name: Create Backend Service
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', './k8s/backend-service.yaml') | from_yaml }}"
+
+    - name: Create Frontend Deployment
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', './k8s/frontend-deployment.yaml') | from_yaml }}"
+
+    - name: Create Frontend Service
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', './k8s/frontend-service.yaml') | from_yaml }}"
+
+    - name: Create ConfigMap
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', './k8s/frontend-configmap.yaml') | from_yaml }}"
+
+    - name: Create Ingress
+      kubernetes.core.k8s:
+        state: present
+        definition: "{{ lookup('file', './k8s/boot-ingress.yaml') | from_yaml }}"

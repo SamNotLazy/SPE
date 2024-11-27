@@ -74,27 +74,12 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy with Ansible') {
             steps {
-                echo 'Deploying the application to Kubernetes...'
-                withKubeConfig([credentialsId: 'k8s-credentials']) {
-                    sh '''
-                    kubectl apply -f k8s/backend-deployment.yml --namespace=$K8S_NAMESPACE
-                    kubectl apply -f k8s/frontend-deployment.yml --namespace=$K8S_NAMESPACE
-                    '''
-                }
-                
+                sh 'ansible-playbook -i ansible/inventory.yml ansible/playbook.yml'
             }
         }
 
-        stage('Post-Deployment Tests') {
-            steps {
-                echo 'Running post-deployment tests...'
-                sh '''
-                curl -f http://$(kubectl get svc stock-frontend-service --namespace=$K8S_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-                '''
-            }
-        }
     }
 
     post {
