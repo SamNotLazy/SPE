@@ -3,33 +3,22 @@
   hosts: all
   tasks:
 
-    - name: Ensure pipx is installed
+    - name: Ensure Python3 and virtualenv are installed
       apt:
-        name: pipx
+        name:
+          - python3
+          - python3-venv
+          - python3-pip
         state: present
 
-    - name: Ensure pipx binary is available
-      shell: |
-        export PATH=$PATH:/usr/local/bin
-        echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
+    - name: Create a virtual environment for Ansible Kubernetes modules
+      command: python3 -m venv /opt/ansible-venv
       args:
-        executable: /bin/bash
+        creates: /opt/ansible-venv/bin/activate
 
-    - name: Install openshift using pipx
+    - name: Install required Python packages in the virtual environment
       shell: |
-        pipx install openshift || pipx upgrade openshift
-      args:
-        executable: /bin/bash
-
-    - name: Install pyyaml using pipx
-      shell: |
-        pipx install pyyaml || pipx upgrade pyyaml
-      args:
-        executable: /bin/bash
-
-    - name: Install kubernetes using pipx
-      shell: |
-        pipx install kubernetes || pipx upgrade kubernetes
+        source /opt/ansible-venv/bin/activate && pip install openshift pyyaml kubernetes
       args:
         executable: /bin/bash
 
