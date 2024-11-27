@@ -1,13 +1,37 @@
 ---
 - name: Deploying with Kubernetes
-  hosts: localhost
+  hosts: all
   tasks:
-    - name: Install prerequisites
-      pip:
-        name:
-          - openshift
-          - pyyaml
-          - kubernetes
+
+    - name: Ensure pipx is installed
+      apt:
+        name: pipx
+        state: present
+
+    - name: Ensure pipx binary is available
+      shell: |
+        export PATH=$PATH:/usr/local/bin
+        echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
+      args:
+        executable: /bin/bash
+
+    - name: Install openshift using pipx
+      shell: |
+        pipx install openshift || pipx upgrade openshift
+      args:
+        executable: /bin/bash
+
+    - name: Install pyyaml using pipx
+      shell: |
+        pipx install pyyaml || pipx upgrade pyyaml
+      args:
+        executable: /bin/bash
+
+    - name: Install kubernetes using pipx
+      shell: |
+        pipx install kubernetes || pipx upgrade kubernetes
+      args:
+        executable: /bin/bash
 
     - name: Apply Secrets
       kubernetes.core.k8s:

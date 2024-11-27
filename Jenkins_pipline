@@ -5,7 +5,6 @@ pipeline {
         BACKEND_IMAGE = "stock-exchange-backend:latest"
         FRONTEND_IMAGE = "stock-exchange-frontend:latest"
         DOCKER_REGISTRY = "docker.io/mutedslow"
-        K8S_NAMESPACE = "stock-exchange"
     }
 
     stages {
