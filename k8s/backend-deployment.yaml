@@ -4,7 +4,7 @@ metadata:
   name: backend-deployment
   namespace: default
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -15,6 +15,21 @@ spec:
     spec:
       containers:
       - name: backend
-        image: mutedslow/stock-exchange-backend:latest
+        image: samnotlazy/backend:latest
+        imagePullPolicy: Always
         ports:
-        - containerPort: 8080
+        - containerPort: 8082
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: default
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+  type: NodePort

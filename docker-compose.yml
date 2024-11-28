@@ -4,24 +4,59 @@ services:
     build:
       context: ./stock-exchange-backend
     ports:
-      - "8080:8080"
+      - "8082:8082"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/stock_exchange
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-container:3306/stock_exchange
       - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=142002
+      - SPRING_DATASOURCE_PASSWORD=root_password
+    networks:
+      - my-network
+    image: samnotlazy/backend:latest
     depends_on:
-      - db
+      - app
 
   frontend:
     build:
       context: ./stock-exchange-frontend
     ports:
-      - "3000:80"
+      - "3000:3000"
+    networks:
+      - my-network
+    image: samnotlazy/frontend:latest
 
-  db:
-    image: mysql:8
-    environment:
-      MYSQL_ROOT_PASSWORD: 142002
-      MYSQL_DATABASE: stock_exchange
+  mysql:
+    build:
+      context: ./Database
+
+    container_name: mysql-container
     ports:
       - "3306:3306"
+    networks:
+      - my-network
+    image: samnotlazy/mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: stock_exchange
+
+
+  app:
+    build:
+      context: ./integrityTests
+
+    container_name: itestapp-container
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root_password
+    depends_on:
+      - mysql
+    ports:
+      - "8081:8081"
+    networks:
+      - my-network
+    image: samnotlazy/app:latest
+
+networks:
+  my-network:
+    driver: bridge

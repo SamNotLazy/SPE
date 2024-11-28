@@ -8,7 +8,7 @@ WORKDIR /app
 COPY target/stock-exchange-backend-0.0.1-SNAPSHOT.jar app.jar
 
 # Expose the application port
-EXPOSE 8080
+EXPOSE 8082
 
 # Run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "echo 'Sleeping for 30 seconds...'; sleep 15; echo 'Starting the application...'; exec java -jar app.jar"]
