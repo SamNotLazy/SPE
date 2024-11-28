@@ -52,7 +52,15 @@ pipeline {
             steps {
                 script {
                     echo 'Building and starting Docker containers using docker-compose...'
-                    bat "docker-compose up --build -d"
+                    bat """
+                    cd stock-exchange-frontend
+                                        npm install
+                                        npm run build
+                                        cd ..
+                                        docker-compose up --build -d
+
+                    """
+
                 }
             }
         }
