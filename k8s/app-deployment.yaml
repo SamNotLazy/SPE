@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: itestapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: itestapp
+  template:
+    metadata:
+      labels:
+        app: itestapp
+    spec:
+      containers:
+        - name: itestapp
+          image: samnotlazy/app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          env:
+            - name: MYSQL_HOST
+              value: "mysql-service"  # The name of the MySQL service in Kubernetes
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              value: "root_password"  # The password you set for MySQL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: itestapp
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8081
+  selector:
+    app: itestapp
+  type: NodePort
