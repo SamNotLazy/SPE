@@ -97,6 +97,7 @@ pipeline {
         stage('Deploy to Minikube') {
             steps {
                 echo 'Deploying application to Minikube...'
+                bat "minikube start "
                 bat """
                     kubectl apply -f ./k8s/mysql-deployment.yaml
                     kubectl apply -f ./k8s/app-deployment.yaml
@@ -120,6 +121,7 @@ pipeline {
             echo 'Pipeline finished. Cleaning up Docker containers...'
             bat "docker stop ${SQL_CONTAINER_NAME} ${INTEGRITY_TEST_CONTAINER_NAME}"
             bat "docker rm ${SQL_CONTAINER_NAME} ${INTEGRITY_TEST_CONTAINER_NAME}"
+            bat "minikube delete"
         }
         success {
             echo 'Pipeline succeeded.'
