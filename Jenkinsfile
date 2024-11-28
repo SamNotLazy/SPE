@@ -28,20 +28,25 @@ pipeline {
             }
         }
 
-        stage('Maven Build') {
+        stage('Maven Build and Frontend Build') {
             steps {
-                bat "cd stock-exchange-backend"
-                bat "mvn clean package"
-                bat "cd .. "
+                bat """
+                    cd stock-exchange-backend
+                    mvn clean package
+                    cd ..
 
-                bat "cd integrityTests"
-                bat "mvn clean package"
-                bat "cd .. "
-                bat "cd stock-exchange-frontend"
-                bat "npm run build"
-                bat "cd .. "
+                    cd integrityTests
+                    mvn clean package
+                    cd ..
+
+                    cd stock-exchange-frontend
+                    npm install
+                    npm run build
+                    cd ..
+                """
             }
         }
+
 
         stage('Docker Image Testing') {
             steps {
