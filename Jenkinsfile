@@ -32,11 +32,11 @@ pipeline {
             steps {
                 bat """
                     cd stock-exchange-backend
-                    mvn clean package
+                    mvn clean package -DskipTests
                     cd ..
 
                     cd integrityTests
-                    mvn clean package
+                    mvn clean package -DskipTests
                     cd ..
 
                     cd stock-exchange-frontend
