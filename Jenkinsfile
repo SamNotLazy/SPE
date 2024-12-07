@@ -39,10 +39,7 @@ pipeline {
                     mvn clean package -DskipTests
                     cd ..
 
-                    cd stock-exchange-frontend
-                    npm install
-                    npm run build
-                    cd ..
+
                 """
             }
         }
@@ -53,11 +50,12 @@ pipeline {
                 script {
                     echo 'Building and starting Docker containers using docker-compose...'
                     bat """
-                    cd stock-exchange-frontend
+                                        cd stock-exchange-frontend
                                         npm install
                                         npm run build
                                         cd ..
-                                        docker-compose up --build -d
+                                        docker compose down
+                                        docker-compose build
 
                     """
 
@@ -91,10 +89,12 @@ pipeline {
                     echo 'Logging in to Docker Hub and pushing images...'
                     bat """
                         docker login -u %DOCKER_USERNAME% -p %DOCKER_PASSWORD%
+
                         docker push samnotlazy/mysql:latest
                         docker push samnotlazy/app:latest
                         docker push samnotlazy/backend:latest
                         docker push samnotlazy/frontend:latest
+
                     """
                 }
             }
@@ -116,9 +116,11 @@ pipeline {
                     kubectl apply -f ./k8s/app-deployment.yaml
                     kubectl apply -f ./k8s/backend-deployment.yaml
                     kubectl apply -f ./k8s/frontend-deployment.yaml
-                    kubectl apply -f ./k8s/test-pod-shell.yaml
 
+                    kubectl apply -f ./k8s/test-pod-shell.yaml
                 """
+//                 kubectl set image deployment/backend-deployment backend=samnotlazy/backend:latest
+
             }
         }
         stage('Mysql Connectivity Check') {

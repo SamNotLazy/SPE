@@ -33,6 +33,6 @@ spec:
     - port: 3306
       targetPort: 3306
       protocol: TCP
-  type: NodePort
+  type: ClusterIP
   selector:
     app: mysql
